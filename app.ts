@@ -1,0 +1,1 @@
+void (() => console.log("I'm running typescript natively!"))();

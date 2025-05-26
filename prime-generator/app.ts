@@ -19,7 +19,7 @@ export default class PrimeGeneratorApp implements Runnable {
 
         for (let t = 0; t < this.THREADS; t++) {
             const thread = new Worker('./prime-generator/thread.ts', {
-                workerData: { numberOfPrimeNumbers: numberOfPrimeNumbers / this.THREADS, start: 100_000_000_000_000 },
+                workerData: { numberOfPrimeNumbers: numberOfPrimeNumbers / this.THREADS, start: 100_000_000_000_000 * t },
             });
             const { threadId } = thread;
             console.log(`Thread: ${threadId} started`);

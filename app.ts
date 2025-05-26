@@ -1,9 +1,11 @@
 import type Runnable from "./interfaces.ts";
 
 import Messaging from "./messaging/app.ts";
+import PrimeGenerator from "./prime-generator/app.ts";
 
 const RunnableInputsMapping: Record<string, Runnable> = {
     'messaging': new Messaging(),
+    'prime-generator': new PrimeGenerator()
 };
 
 void (() => {    

@@ -1,3 +1,4 @@
+import HeavyRandomOperationsApp from './heavy-random-operations/app.ts';
 import type Runnable from './interfaces.ts';
 
 import Messaging from './messaging/app.ts';
@@ -8,6 +9,7 @@ const RunnableInputsMapping: Record<string, Runnable> = {
     messaging: new Messaging(),
     'prime-generator': new PrimeGenerator(),
     'prime-generator-http-server': new PrimeNumberGeneratorHttpServer(),
+    'heavy-random-operations': new HeavyRandomOperationsApp(),
 };
 
 void (() => {

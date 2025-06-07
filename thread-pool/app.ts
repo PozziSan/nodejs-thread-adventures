@@ -5,7 +5,7 @@ import type { Task, TaskResults } from './types.ts';
 export default class ThreadPoolRunnable implements Runnable {
     public async run() {
         const pool = new Pool(4);
-        setTimeout(async () => await pool.destroy(), 1000 * 60);
+        const timeout = setTimeout(async () => await pool.destroy(), 1000 * 60);
         const promises: Promise<TaskResults>[] = [];
 
         for (let i = 0; i < 8000; i++) {
@@ -39,6 +39,7 @@ export default class ThreadPoolRunnable implements Runnable {
         console.log('Finished all tasks!');
         console.log(results.length);
 
+        clearTimeout(timeout);
         await pool.destroy();
     }
 }

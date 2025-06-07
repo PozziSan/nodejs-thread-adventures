@@ -12,6 +12,14 @@ export default class Pool {
         this.threads = [];
         this.scheduledTasks = [];
         this.idleThreads = [];
+        this.startPool();
+    }
+
+    public startPool() {
+        if (this.threads.length) {
+            console.log(`Pool already started and running. There are: ${this.threads.length} running Threads.`);
+            return;
+        }
 
         console.log('--------------------');
         console.log('Started Thread Pool!');
@@ -48,7 +56,7 @@ export default class Pool {
 
         this.idleThreads.push(thread);
         thread.currentTask = undefined;
-        
+
         console.log(`Promise resolved for thread: ${thread.threadId}. Running next task`);
         this.runNextTask();
     }
@@ -57,9 +65,9 @@ export default class Pool {
         if (this.scheduledTasks.length && this.idleThreads.length) {
             const task = this.scheduledTasks.shift()!;
             console.log(`Found new task to run: ${task.taskName}`);
-        
+
             const thread = this.idleThreads.shift()!;
-        
+
             thread.currentTask = task;
             thread.postMessage(this.convertTaskIntoWorkerTask(task));
             console.log(`Submitted new task for thread: ${thread?.threadId}: ${task.taskName}`);
@@ -67,7 +75,7 @@ export default class Pool {
     }
 
     private convertTaskIntoWorkerTask(task: Task): WorkerTask {
-        const {resolve, reject, ...workerTask} = task;
+        const { resolve, reject, ...workerTask } = task;
 
         return workerTask;
     }
@@ -87,11 +95,21 @@ export default class Pool {
     }
 
     public async destroy() {
+        if (!this.threads.length) {
+            console.log("There isn't any thread to destroy!");
+            return;
+        }
+
         await Promise.all(
             this.threads.map((thread) => {
                 console.log(`Terminating thread: ${thread.threadId}`);
                 thread.terminate();
             })
         );
+
+        this.threads.length = 0;
+        this.idleThreads.length = 0;
+        this.scheduledTasks.length = 0;
+        console.log('Destroyed Thread Pool!');
     }
 }

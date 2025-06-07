@@ -1,3 +1,3 @@
 export default interface Runnable {
-    run(): void
+    run(): void | Promise<void>
 };

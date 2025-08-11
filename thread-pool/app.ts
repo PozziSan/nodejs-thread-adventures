@@ -1,19 +1,35 @@
 import type Runnable from '../interfaces.ts';
 import Pool from './pool.ts';
 import type { Task, TaskResults } from './types.ts';
+import { setImmediate } from 'timers/promises';
 
 export default class ThreadPoolRunnable implements Runnable {
-    public async run() {
-        const pool = new Pool(4);
-        const timeout = setTimeout(async () => await pool.destroy(), 1000 * 60);
+    private readonly pool: Pool;
+    private readonly timeout: NodeJS.Timeout;
+    private readonly bachSize: number;
+    private readonly totalTasks: number;
+    private resultCount: number;
+
+    public constructor() {
+        this.pool = new Pool(4);
+        this.timeout = setTimeout(async () => await this.pool.destroy(), 1000 * 600);
+        this.bachSize = 500;
+        this.totalTasks = 100_000;
+        this.resultCount = 0;
+    }
+
+    private async processBatch(startIndex: number, endIndex: number, batchIndex: number) {
+        console.log('--------------------');
+        console.log(`Starting Batch: ${batchIndex}`);
+
         const promises: Promise<TaskResults>[] = [];
 
-        for (let i = 0; i < 8000; i++) {
+        for (let i = startIndex; i < endIndex; i++) {
             const taskPrimes: Task = {
                 taskName: 'primeNumbers',
                 options: {
-                    numberOfPrimeNumbers: i,
-                    start: i * 1000,
+                    numberOfPrimeNumbers: 10_000,
+                    start: i,
                 },
                 resolve: () => {},
                 reject: () => {},
@@ -21,25 +37,45 @@ export default class ThreadPoolRunnable implements Runnable {
             const taskRandomSum: Task = {
                 taskName: 'randomNumberSum',
                 options: {
-                    numberOfRandomNumbers: i * 1000,
+                    numberOfRandomNumbers: 10_000,
                     type: 'crypto-batch',
-                    batchSize: i * 1000,
+                    batchSize: this.bachSize * 2,
                 },
                 resolve: () => {},
                 reject: () => {},
             };
 
-            promises.push(pool.run(taskPrimes));
-            promises.push(pool.run(taskRandomSum));
+            promises.push(this.pool.run(taskPrimes));
+            promises.push(this.pool.run(taskRandomSum));
         }
 
         const results = await Promise.all(promises);
+        this.resultCount += results.length;
+
+        console.log('--------------------');
+        console.log(`Finished Batch: ${batchIndex}`);
+    }
+
+    public async run() {
+        for (let batchIndex = 0; batchIndex < Math.ceil(this.totalTasks / this.bachSize); batchIndex++) {
+            const startIndex = batchIndex * this.bachSize;
+            const endIndex = Math.min((batchIndex + 1) * this.bachSize, this.totalTasks);
+
+            await this.processBatch(startIndex, endIndex, batchIndex);
+
+            // At every 10 batches set a new tick on the event loop to prevent the event loop from blocking and give GC opportunity to run
+            if (batchIndex % 10 === 0) {
+                console.log('--------------------');
+                console.log('Breathing...');
+                await setImmediate();
+            }
+        }
 
         console.log('---------------------------');
         console.log('Finished all tasks!');
-        console.log(results.length);
+        console.log(this.resultCount);
 
-        clearTimeout(timeout);
-        await pool.destroy();
+        clearTimeout(this.timeout);
+        await this.pool.destroy();
     }
 }

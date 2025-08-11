@@ -40,7 +40,7 @@ export default class Pool {
         thread.on('error', (reason) => this.handleError(thread, reason));
 
         this.threads.push(thread);
-        this.idleThreads.push(thread); // In the begging all threads are idle
+        this.idleThreads.push(thread); // In the beginning all threads are idle
     }
 
     private handleError(thread: PoolWorker, reason: Error) {

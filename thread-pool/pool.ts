@@ -6,7 +6,7 @@ export default class Pool {
     private readonly threads: PoolWorker[];
     private readonly idleThreads: PoolWorker[];
     private readonly scheduledTasks: Task[];
-    private readonly debug: boolean
+    private readonly debug: boolean;
 
     public constructor(threadNumber: number, debug: boolean = false) {
         this.threadNumber = threadNumber;
@@ -72,7 +72,7 @@ export default class Pool {
 
             thread.currentTask = task;
             thread.postMessage(this.convertTaskIntoWorkerTask(task));
-            if(this.debug) console.log(`Submitted new task for thread: ${thread?.threadId}: ${task.taskName}`);
+            if (this.debug) console.log(`Submitted new task for thread: ${thread?.threadId}: ${task.taskName}`);
         }
     }
 

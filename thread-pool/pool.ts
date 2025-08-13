@@ -14,10 +14,9 @@ export default class Pool {
         this.scheduledTasks = [];
         this.idleThreads = [];
         this.debug = debug;
-        this.startPool();
     }
 
-    public startPool() {
+    public start() {
         if (this.threads.length) {
             if (this.debug) console.log(`Pool already started and running. There are: ${this.threads.length} running Threads.`);
             return;

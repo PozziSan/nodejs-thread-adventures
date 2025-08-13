@@ -57,6 +57,8 @@ export default class ThreadPoolRunnable implements Runnable {
     }
 
     public async run() {
+        this.pool.start();
+        
         for (let batchIndex = 0; batchIndex < Math.ceil(this.totalTasks / this.bachSize); batchIndex++) {
             const startIndex = batchIndex * this.bachSize;
             const endIndex = Math.min((batchIndex + 1) * this.bachSize, this.totalTasks);

@@ -14,6 +14,10 @@ export default class SharedMemoryRunnable implements Runnable {
         new Worker('./shared-memory/thread.ts', { workerData: { sharedData: sharedData.buffer, data: firstMessage } });
         new Worker('./shared-memory/thread.ts', { workerData: { sharedData: sharedData.buffer, data: secondMessage } });
 
-        setTimeout(() => console.log(`Final data: ${sharedData}`), 1000);
+        setTimeout(() => {
+            console.log(`Final data: ${sharedData}`);
+
+            process.exit(1);
+        }, 1000);
     }
 }

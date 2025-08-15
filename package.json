@@ -11,8 +11,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "ts": "node --experimental-strip-types",
-    "ts:watch": "node --experimental-strip-types --watch"
+    "ts": "node --experimental-strip-types --disable-warning=ExperimentalWarning",
+    "ts:watch": "node --experimental-strip-types --disable-warning=ExperimentalWarning --watch"
   },
   "repository": {
     "type": "git",

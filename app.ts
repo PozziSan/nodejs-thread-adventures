@@ -4,6 +4,7 @@ import type Runnable from './interfaces.ts';
 import Messaging from './messaging/app.ts';
 import PrimeNumberGeneratorHttpServer from './prime-generator-http-server/app.ts';
 import PrimeGenerator from './prime-generator/app.ts';
+import SemaphoreRunnable from './semaphore/app.ts';
 import SharedMemoryRunnable from './shared-memory/app.ts';
 import ThreadPoolRunnable from './thread-pool/app.ts';
 
@@ -13,7 +14,8 @@ const RunnableInputsMapping: Record<string, Runnable> = {
     'prime-generator-http-server': new PrimeNumberGeneratorHttpServer(),
     'heavy-random-operations': new HeavyRandomOperationsApp(),
     'thread-pool': new ThreadPoolRunnable(),
-    'shared-memory': new SharedMemoryRunnable()
+    'shared-memory': new SharedMemoryRunnable(),
+    'semaphore': new SemaphoreRunnable()
 };
 
 void (async () => {

@@ -18,11 +18,17 @@
     "type": "git",
     "url": "git+https://github.com/PozziSan/nodejs-thread-adventures.git"
   },
-  "keywords": [],
+  "keywords": [ ],
   "author": "",
   "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/PozziSan/nodejs-thread-adventures/issues"
   },
-  "homepage": "https://github.com/PozziSan/nodejs-thread-adventures#readme"
+  "homepage": "https://github.com/PozziSan/nodejs-thread-adventures#readme",
+  "prettier": {
+    "tabWidth": 4,
+    "printWidth": 120,
+    "singleQuote": true,
+    "experimentalTernaries": true
+  }
 }

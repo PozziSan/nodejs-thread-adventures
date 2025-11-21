@@ -1,3 +1,4 @@
+import CppAddonsRunnable from './cpp-addons/app.ts';
 import HeavyRandomOperationsApp from './heavy-random-operations/app.ts';
 import type Runnable from './interfaces.ts';
 
@@ -18,6 +19,7 @@ const RunnableInputsMapping: Record<string, Runnable> = {
     'shared-memory': new SharedMemoryRunnable(),
     semaphore: new SemaphoreRunnable(),
     'thread-pool-shared-memory': new ThreadPoolSharedMemoryRunnable(),
+    'cpp-addons': new CppAddonsRunnable(),
 };
 
 void (async () => {

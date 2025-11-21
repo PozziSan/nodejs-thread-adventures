@@ -1,24 +1,30 @@
 import type Runnable from '../interfaces.ts';
 import Pool from './pool.ts';
-import type { Task, TaskResults } from './types.ts';
+import type { GenericTask, Task, TaskResults } from './types.ts';
 import { setImmediate } from 'timers/promises';
 
 export default class ThreadPoolRunnable implements Runnable {
-    private readonly pool: Pool;
-    private readonly timeout: NodeJS.Timeout;
-    private readonly bachSize: number;
-    private readonly totalTasks: number;
-    private resultCount: number;
+    protected pool: Pool;
+    protected readonly timeout: NodeJS.Timeout;
+    protected readonly bachSize: number;
+    protected readonly totalTasks: number;
+    protected resultCount: number;
 
     public constructor() {
         this.pool = new Pool(4);
         this.timeout = setTimeout(async () => await this.pool.destroy(), 1000 * 600);
-        this.bachSize = 500;
-        this.totalTasks = 100_000;
+        this.bachSize = 400;
+        this.totalTasks = 5_000;
         this.resultCount = 0;
     }
 
-    private async processBatch(startIndex: number, endIndex: number, batchIndex: number) {
+    protected async processBatch(
+        startIndex: number,
+        endIndex: number,
+        batchIndex: number,
+        resultCb: GenericTask['resolve'] = () => {},
+        rejectCb: GenericTask['reject'] = () => {}
+    ) {
         console.log('--------------------');
         console.log(`Starting Batch: ${batchIndex}`);
 
@@ -31,8 +37,8 @@ export default class ThreadPoolRunnable implements Runnable {
                     numberOfPrimeNumbers: 10_000,
                     start: i,
                 },
-                resolve: () => {},
-                reject: () => {},
+                resolve: resultCb,
+                reject: rejectCb,
             };
             const taskRandomSum: Task = {
                 taskName: 'randomNumberSum',
@@ -41,8 +47,8 @@ export default class ThreadPoolRunnable implements Runnable {
                     type: 'crypto-batch',
                     batchSize: this.bachSize * 2,
                 },
-                resolve: () => {},
-                reject: () => {},
+                resolve: resultCb,
+                reject: rejectCb,
             };
 
             promises.push(this.pool.run(taskPrimes));
@@ -58,7 +64,7 @@ export default class ThreadPoolRunnable implements Runnable {
 
     public async run() {
         this.pool.start();
-        
+
         for (let batchIndex = 0; batchIndex < Math.ceil(this.totalTasks / this.bachSize); batchIndex++) {
             const startIndex = batchIndex * this.bachSize;
             const endIndex = Math.min((batchIndex + 1) * this.bachSize, this.totalTasks);

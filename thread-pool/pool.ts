@@ -1,12 +1,13 @@
 import { Worker } from 'worker_threads';
-import type { Task, PoolWorker, TaskResults, ExtractTaskResult, WorkerTask } from './types.ts';
+import type { Task, PoolWorker, TaskResults, ExtractTaskResult, WorkerTask, TaskMap } from './types.ts';
 
 export default class Pool {
     private readonly threadNumber: number;
-    private readonly threads: PoolWorker[];
-    private readonly idleThreads: PoolWorker[];
     private readonly scheduledTasks: Task[];
-    private readonly debug: boolean;
+
+    protected readonly threads: PoolWorker[];
+    protected readonly idleThreads: PoolWorker[];
+    protected readonly debug: boolean;
 
     public constructor(threadNumber: number, debug: boolean = false) {
         this.threadNumber = threadNumber;
@@ -18,7 +19,8 @@ export default class Pool {
 
     public start() {
         if (this.threads.length) {
-            if (this.debug) console.log(`Pool already started and running. There are: ${this.threads.length} running Threads.`);
+            if (this.debug)
+                console.log(`Pool already started and running. There are: ${this.threads.length} running Threads.`);
             return;
         }
 
@@ -31,7 +33,7 @@ export default class Pool {
         }
     }
 
-    private spawnThread() {
+    protected spawnThread() {
         const thread = new Worker('./thread-pool/thread.ts') as PoolWorker;
         if (this.debug) console.log(`Spawned Thread: ${thread.threadId}`);
 
@@ -42,18 +44,18 @@ export default class Pool {
         this.idleThreads.push(thread); // In the beginning all threads are idle
     }
 
-    private handleError(thread: PoolWorker, reason: Error) {
+    protected async handleError(thread: PoolWorker, reason: Error) {
         if (this.debug) console.log(`There was an Error on Thread ${thread.threadId}: ${reason}`);
 
-        thread.currentTask!.reject(reason);
+        await thread.currentTask!.reject(reason);
         thread.currentTask = undefined;
         this.runNextTask();
     }
 
-    private handleResult(thread: PoolWorker, result: TaskResults) {
+    protected async handleResult(thread: PoolWorker, result: TaskResults) {
         if (this.debug) console.log(`Thread ${thread.threadId} finished. Resolving Promise`);
 
-        (thread.currentTask!.resolve as (result: TaskResults) => void)(result);
+        await (thread.currentTask!.resolve as (result: TaskResults) => void | Promise<void>)(result);
 
         this.idleThreads.push(thread);
         thread.currentTask = undefined;
@@ -83,10 +85,18 @@ export default class Pool {
 
     public async run<T extends Task>(task: T): Promise<ExtractTaskResult<T>> {
         return new Promise<ExtractTaskResult<T>>((resolve, reject) => {
+            const { resolve: originalResolve, reject: originalReject } = task;
+
             const promiseTask = {
                 ...task,
-                resolve,
-                reject,
+                resolve: async (result: ExtractTaskResult<T>) => {
+                    await (originalResolve as (result: TaskResults) => void | Promise<void>)(result);
+                    resolve(result);
+                },
+                reject: async (reason: Error) => {
+                    await originalReject(reason);
+                    reject(reason);
+                },
             } satisfies T;
 
             this.scheduledTasks.push(promiseTask);

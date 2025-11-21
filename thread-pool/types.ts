@@ -25,8 +25,8 @@ type TaskType = keyof TaskMap;
 export type GenericTask<T extends TaskType = TaskType> = {
     taskName: T;
     options: TaskMap[T]['options'];
-    resolve: (result: TaskMap[T]['result']) => void;
-    reject: (reason: Error) => void;
+    resolve: (result: TaskMap[T]['result']) => (void | Promise<void>);
+    reject: (reason: Error) => (void | Promise<void>);
 };
 export type GenericWorkerTask<T extends TaskType> = Omit<GenericTask<T>, 'resolve' | 'reject'>;
 

@@ -1,5 +1,6 @@
 import BufferRunnable from './buffers/app.ts';
 import CppAddonsRunnable from './cpp-addons/app.ts';
+import EncryptDecryptRunnable from './encrypt-decrypt/app.ts';
 import FilesRunnable from './files/app.ts';
 import HeavyRandomOperationsApp from './heavy-random-operations/app.ts';
 import type Runnable from './interfaces.ts';
@@ -24,6 +25,7 @@ const RunnableInputsMapping: Record<string, Runnable> = {
     'cpp-addons': new CppAddonsRunnable(),
     buffer: new BufferRunnable(),
     files: new FilesRunnable(),
+    'encrypt-decrypt': new EncryptDecryptRunnable(),
 };
 
 void (async () => {
@@ -35,4 +37,6 @@ void (async () => {
     if (!runnable) throw new Error('Runnable not registered!');
 
     await runnable.run();
+
+    process.exit(0);
 })();
